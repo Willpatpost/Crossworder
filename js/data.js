@@ -7,6 +7,8 @@ export class DataManager {
         this.letterFrequencies = {};
         this.fallbackWords = ["LASER", "SAILS", "SHEET", "STEER", "HEEL", "HIKE", "KEEL", "KNOT"];
         this.dataFilePath = 'Data/Words.txt';
+        this.grid = []; // 2D array representing the crossword grid
+        this.slots = {}; // Slots will be populated by the Solver
     }
 
     /**
@@ -235,5 +237,91 @@ export class DataManager {
             };
             reader.readAsText(file);
         });
+    }
+
+    /**
+     * Generate a new crossword grid based on specified dimensions.
+     * @param {number} rows - Number of rows.
+     * @param {number} cols - Number of columns.
+     */
+    generateGrid(rows, cols) {
+        this.grid = [];
+        for (let r = 0; r < rows; r++) {
+            const row = [];
+            for (let c = 0; c < cols; c++) {
+                row.push('.'); // Initialize all cells as empty
+            }
+            this.grid.push(row);
+        }
+        console.log(`New grid generated with ${rows} rows and ${cols} columns.`);
+    }
+
+    /**
+     * Load a predefined puzzle into the grid.
+     * @param {string} difficulty - Difficulty level ('Easy', 'Medium', 'Hard').
+     */
+    loadPredefinedPuzzle(difficulty) {
+        // Define predefined puzzles
+        const predefinedPuzzles = {
+            "Easy": {
+                grid: [
+                    ['1', '.', '.', '#', '.', '.', '.', '.', '.', '2'],
+                    ['.', '.', '.', '#', '.', '.', '.', '#', '.', '.'],
+                    ['.', '.', '.', '#', '.', '.', '.', '#', '.', '.'],
+                    ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
+                    ['3', '.', '.', '#', '.', '.', '.', '#', '.', '4'],
+                    ['.', '.', '.', '#', '.', '.', '.', '#', '.', '.'],
+                    ['.', '.', '.', '#', '.', '.', '.', '#', '.', '.'],
+                    ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
+                    ['5', '.', '.', '#', '.', '.', '.', '#', '.', '6'],
+                    ['.', '.', '.', '#', '.', '.', '.', '#', '.', '.']
+                ],
+                words: ["HELLO", "WORLD", "CROSS", "WORDS", "PUZZLE", "SOLVE"]
+            },
+            "Medium": {
+                grid: [
+                    ['1', '.', '.', '.', '.', '#', '.', '.', '.', '2'],
+                    ['.', '#', '#', '#', '.', '.', '.', '#', '#', '.'],
+                    ['.', '.', '.', '.', '.', '#', '.', '.', '.', '.'],
+                    ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
+                    ['3', '.', '.', '.', '.', '.', '.', '.', '.', '4'],
+                    ['.', '.', '.', '.', '.', '#', '.', '.', '.', '.'],
+                    ['.', '#', '#', '#', '.', '.', '.', '#', '#', '.'],
+                    ['.', '.', '.', '.', '.', '#', '.', '.', '.', '.'],
+                    ['5', '.', '.', '.', '.', '#', '.', '.', '.', '6'],
+                    ['.', '#', '#', '#', '.', '.', '.', '#', '#', '.']
+                ],
+                words: ["SOLID", "STACK", "HEART", "BRAVE", "QUIET", "JAZZY"]
+            },
+            "Hard": {
+                grid: [
+                    ['1', '.', '#', '.', '.', '.', '#', '.', '2', '.'],
+                    ['.', '.', '#', '.', '#', '.', '#', '.', '.', '.'],
+                    ['#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
+                    ['.', '.', '#', '.', '#', '.', '#', '.', '.', '.'],
+                    ['3', '.', '#', '.', '.', '.', '#', '.', '4', '.'],
+                    ['.', '.', '#', '#', '#', '#', '#', '#', '.', '.'],
+                    ['#', '#', '#', '.', '#', '.', '#', '#', '#', '#'],
+                    ['.', '.', '#', '.', '#', '.', '#', '.', '.', '.'],
+                    ['5', '.', '#', '.', '.', '.', '#', '.', '6', '.'],
+                    ['.', '.', '#', '.', '#', '.', '#', '.', '.', '.']
+                ],
+                words: ["CHALLENGE", "PUZZLING", "DIFFICULT", "COMPLEX", "INTRICATE", "STRATEGY"]
+            }
+        };
+
+        const puzzle = predefinedPuzzles[difficulty];
+        if (!puzzle) {
+            alert(`No predefined puzzle found for difficulty: ${difficulty}`);
+            return;
+        }
+
+        // Load grid
+        this.grid = puzzle.grid.map(row => row.slice()); // Deep copy
+
+        // Optionally, handle numbering and pre-filled letters
+        // For simplicity, this example assumes the predefined grids are already numbered and filled
+
+        console.log(`${difficulty} puzzle loaded.`);
     }
 }
