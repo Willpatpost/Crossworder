@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Crossword Generator</title>
     <!-- Link to the CSS file -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="main-container">
@@ -51,35 +51,6 @@
             <div id="mode-label" class="mode-label">Mode: Default</div>
         </section>
 
-        <!-- Accessibility Controls Section -->
-        <section class="accessibility-controls-section">
-            <h2>Accessibility</h2>
-            <div class="accessibility-controls">
-                <button id="high-contrast-button" class="btn accessibility-btn">Enable High Contrast</button>
-                <button id="increase-font-button" class="btn accessibility-btn">A+</button>
-                <button id="decrease-font-button" class="btn accessibility-btn">A-</button>
-            </div>
-        </section>
-
-        <!-- Undo/Redo Controls Section -->
-        <section class="undo-redo-controls-section">
-            <h2>Undo/Redo</h2>
-            <div class="undo-redo-controls">
-                <button id="undo-button" class="btn undo-redo-btn" disabled>Undo</button>
-                <button id="redo-button" class="btn undo-redo-btn" disabled>Redo</button>
-            </div>
-        </section>
-
-        <!-- Export/Import Controls Section -->
-        <section class="export-import-controls-section">
-            <h2>Export/Import</h2>
-            <div class="export-import-controls">
-                <button id="export-button" class="btn export-import-btn">Export Grid</button>
-                <button id="import-button" class="btn export-import-btn">Import Grid</button>
-                <input type="file" id="import-file-input" accept=".json" style="display: none;">
-            </div>
-        </section>
-
         <!-- Middle Content Section -->
         <section class="middle-content-section">
             <!-- Status Display -->
@@ -117,7 +88,7 @@
         </footer>
     </div>
 
-    <!-- Link to the JavaScript modules -->
-    <script type="module" src="js/main.js"></script>
+    <!-- Link to the JavaScript file -->
+    <script src="script.js"></script>
 </body>
 </html>
