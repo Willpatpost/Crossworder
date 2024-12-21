@@ -35,7 +35,7 @@ export class UIManager {
         this.decreaseFontSize = this.decreaseFontSize.bind(this);
         this.exportGrid = this.exportGrid.bind(this);
         this.importGrid = this.importGrid.bind(this);
-        this.handleExportImportButtons = this.handleExportImportButtons.bind(this);
+        // Removed handleExportImportButtons binding since we are not using it
         this.handleDragStart = this.handleDragStart.bind(this);
         this.handleDragOver = this.handleDragOver.bind(this);
         this.handleDrop = this.handleDrop.bind(this);
@@ -172,13 +172,12 @@ export class UIManager {
         }
 
         // Get the old value before change
-        const key = `${row},${col}`;
         const oldValue = this.dataManager.grid[row][col];
 
         // Update the data model
         this.dataManager.grid[row][col] = newValue;
 
-        // Push to undo stack
+        // Push to undo stack if there's a change
         if (oldValue !== newValue) {
             this.pushToUndoStack({
                 type: 'edit',
@@ -196,10 +195,6 @@ export class UIManager {
         this.highlightActiveSlots(row, col);
     }
 
-    /**
-     * Handle focus event on editable cells.
-     * @param {Event} event 
-     */
     handleCellFocus(event) {
         const cell = event.target;
         const row = parseInt(cell.dataset.row);
@@ -207,22 +202,12 @@ export class UIManager {
         this.highlightActiveSlots(row, col);
     }
 
-    /**
-     * Handle blur event on editable cells.
-     * @param {Event} event 
-     */
     handleCellBlur(event) {
         this.clearActiveSlotHighlights();
     }
 
-    /**
-     * Highlight active ACROSS and DOWN slots based on cell position.
-     * @param {number} row 
-     * @param {number} col 
-     */
     highlightActiveSlots(row, col) {
         this.clearActiveSlotHighlights();
-
         const slots = this.solver.getSlotsAtPosition(row, col);
 
         slots.forEach(slot => {
@@ -238,9 +223,6 @@ export class UIManager {
         });
     }
 
-    /**
-     * Clear all active slot highlights.
-     */
     clearActiveSlotHighlights() {
         const highlightedCells = this.gridContainer.querySelectorAll('.active-slot');
         highlightedCells.forEach(cell => {
@@ -248,9 +230,6 @@ export class UIManager {
         });
     }
 
-    /**
-     * Setup Undo and Redo functionality by adding event listeners to buttons.
-     */
     setupUndoRedo() {
         const undoButton = document.getElementById('undo-button');
         const redoButton = document.getElementById('redo-button');
@@ -268,18 +247,11 @@ export class UIManager {
         if (redoButton) redoButton.disabled = true;
     }
 
-    /**
-     * Push an action to the Undo stack.
-     * @param {Object} action 
-     */
     pushToUndoStack(action) {
         this.undoStack.push(action);
         this.updateUndoRedoButtons();
     }
 
-    /**
-     * Update the state (enabled/disabled) of Undo and Redo buttons.
-     */
     updateUndoRedoButtons() {
         const undoButton = document.getElementById('undo-button');
         const redoButton = document.getElementById('redo-button');
@@ -288,9 +260,6 @@ export class UIManager {
         if (redoButton) redoButton.disabled = this.redoStack.length === 0;
     }
 
-    /**
-     * Perform Undo operation.
-     */
     performUndo() {
         if (this.undoStack.length === 0) return;
 
@@ -300,9 +269,6 @@ export class UIManager {
         this.updateUndoRedoButtons();
     }
 
-    /**
-     * Perform Redo operation.
-     */
     performRedo() {
         if (this.redoStack.length === 0) return;
 
@@ -312,44 +278,22 @@ export class UIManager {
         this.updateUndoRedoButtons();
     }
 
-    /**
-     * Apply an action from the Undo stack.
-     * @param {Object} action 
-     */
     applyReverseAction(action) {
-        const { type, row, col, oldValue, newValue } = action;
-        if (type === 'edit') {
-            this.updateCellContent(row, col, oldValue);
-            this.dataManager.grid[row][col] = oldValue;
-        } else if (type === 'blockToggle') {
+        const { type, row, col, oldValue } = action;
+        if (type === 'edit' || type === 'blockToggle') {
             this.updateCellContent(row, col, oldValue);
             this.dataManager.grid[row][col] = oldValue;
         }
-        // Handle other action types if added in the future
     }
 
-    /**
-     * Reapply an action from the Redo stack.
-     * @param {Object} action 
-     */
     applyAction(action) {
-        const { type, row, col, oldValue, newValue } = action;
-        if (type === 'edit') {
-            this.updateCellContent(row, col, newValue);
-            this.dataManager.grid[row][col] = newValue;
-        } else if (type === 'blockToggle') {
+        const { type, row, col, newValue } = action;
+        if (type === 'edit' || type === 'blockToggle') {
             this.updateCellContent(row, col, newValue);
             this.dataManager.grid[row][col] = newValue;
         }
-        // Handle other action types if added in the future
     }
 
-    /**
-     * Update the content of a specific cell without triggering events.
-     * @param {number} row 
-     * @param {number} col 
-     * @param {string} value 
-     */
     updateCellContent(row, col, value) {
         const cell = this.gridContainer.querySelector(`td[data-row="${row}"][data-col="${col}"]`);
         if (cell && !cell.classList.contains('blocked-cell') && !cell.classList.contains('numbered-cell') && !cell.classList.contains('filled-cell')) {
@@ -358,9 +302,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Setup High Contrast and Font Size controls by adding event listeners to buttons.
-     */
     setupAccessibilityControls() {
         const highContrastButton = document.getElementById('high-contrast-button');
         const increaseFontButton = document.getElementById('increase-font-button');
@@ -379,9 +320,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Toggle High Contrast mode.
-     */
     toggleHighContrast() {
         this.isHighContrast = !this.isHighContrast;
         if (this.isHighContrast) {
@@ -395,29 +333,20 @@ export class UIManager {
         }
     }
 
-    /**
-     * Increase the font size of the grid and other text elements.
-     */
     increaseFontSize() {
-        if (this.fontSize < 24) { // Maximum font size
+        if (this.fontSize < 24) {
             this.fontSize += 2;
             this.applyFontSize();
         }
     }
 
-    /**
-     * Decrease the font size of the grid and other text elements.
-     */
     decreaseFontSize() {
-        if (this.fontSize > 12) { // Minimum font size
+        if (this.fontSize > 12) {
             this.fontSize -= 2;
             this.applyFontSize();
         }
     }
 
-    /**
-     * Apply the current font size to relevant elements.
-     */
     applyFontSize() {
         this.gridContainer.style.fontSize = `${this.fontSize}px`;
         this.acrossDisplay.style.fontSize = `${this.fontSize}px`;
@@ -425,9 +354,6 @@ export class UIManager {
         this.statusDisplay.style.fontSize = `${this.fontSize - 2}px`;
     }
 
-    /**
-     * Setup Export and Import controls by adding event listeners to buttons.
-     */
     setupExportImportControls() {
         const exportButton = document.getElementById('export-button');
         const importButton = document.getElementById('import-button');
@@ -447,15 +373,11 @@ export class UIManager {
                 if (file) {
                     this.importGrid(file);
                 }
-                // Reset the input value to allow re-importing the same file if needed
                 event.target.value = '';
             });
         }
     }
 
-    /**
-     * Export the current crossword grid as a JSON file.
-     */
     exportGrid() {
         const gridData = {
             grid: this.dataManager.grid,
@@ -472,10 +394,6 @@ export class UIManager {
         this.updateStatus("Crossword grid exported as crossword_grid.json");
     }
 
-    /**
-     * Import a crossword grid from a JSON file.
-     * @param {File} file 
-     */
     importGrid(file) {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -485,14 +403,11 @@ export class UIManager {
                     throw new Error("Invalid format. JSON should contain 'grid' and 'slots'.");
                 }
 
-                // Update the grid and slots in DataManager
                 this.dataManager.grid = importedData.grid;
                 this.dataManager.slots = importedData.slots;
 
-                // Re-render the grid
                 this.renderGrid();
 
-                // Clear undo/redo stacks
                 this.undoStack = [];
                 this.redoStack = [];
                 this.updateUndoRedoButtons();
@@ -509,9 +424,6 @@ export class UIManager {
         reader.readAsText(file);
     }
 
-    /**
-     * Setup Mode Controls by adding event listeners to mode buttons.
-     */
     setupModeControls() {
         const numberEntryButton = document.getElementById('number-entry-button');
         const letterEntryButton = document.getElementById('letter-entry-button');
@@ -530,55 +442,30 @@ export class UIManager {
         }
     }
 
-    /**
-     * Toggle between Number Entry Mode.
-     */
     toggleNumberEntryMode() {
         this.currentMode = 'number';
         this.updateModeLabel('Number Entry Mode');
-
-        // Enable numbered cells
         this.enableNumberEntryMode();
-
-        // Disable other modes
         this.disableLetterEntryMode();
         this.disableDragMode();
     }
 
-    /**
-     * Toggle between Letter Entry Mode.
-     */
     toggleLetterEntryMode() {
         this.currentMode = 'letter';
         this.updateModeLabel('Letter Entry Mode');
-
-        // Enable letter entry
         this.enableLetterEntryMode();
-
-        // Disable other modes
         this.disableNumberEntryMode();
         this.disableDragMode();
     }
 
-    /**
-     * Toggle between Drag Mode.
-     */
     toggleDragMode() {
         this.currentMode = 'drag';
         this.updateModeLabel('Drag Mode');
-
-        // Enable drag mode
         this.enableDragMode();
-
-        // Disable other modes
         this.disableNumberEntryMode();
         this.disableLetterEntryMode();
     }
 
-    /**
-     * Update the mode label to reflect the current mode.
-     * @param {string} mode 
-     */
     updateModeLabel(mode) {
         const modeLabel = document.getElementById('mode-label');
         if (modeLabel) {
@@ -586,24 +473,13 @@ export class UIManager {
         }
     }
 
-    /**
-     * Enable Number Entry Mode.
-     * Adds numbering to appropriate cells.
-     */
     enableNumberEntryMode() {
-        // This implementation assumes that numbering is already present.
-        // If numbering needs to be generated, implement the logic here.
-        // For simplicity, we highlight numbered cells.
         const numberedCells = this.gridContainer.querySelectorAll('.numbered-cell');
         numberedCells.forEach(cell => {
             cell.classList.add('highlight-number');
         });
     }
 
-    /**
-     * Disable Number Entry Mode.
-     * Removes numbering highlights.
-     */
     disableNumberEntryMode() {
         const highlightedCells = this.gridContainer.querySelectorAll('.highlight-number');
         highlightedCells.forEach(cell => {
@@ -611,22 +487,13 @@ export class UIManager {
         });
     }
 
-    /**
-     * Enable Letter Entry Mode.
-     * Allows users to enter letters into cells.
-     */
     enableLetterEntryMode() {
-        // Letter entry is the default mode; ensure cells are editable
         const editableCells = this.gridContainer.querySelectorAll('.editable-cell');
         editableCells.forEach(cell => {
             cell.contentEditable = "true";
         });
     }
 
-    /**
-     * Disable Letter Entry Mode.
-     * Prevents users from entering letters into cells.
-     */
     disableLetterEntryMode() {
         const editableCells = this.gridContainer.querySelectorAll('.editable-cell');
         editableCells.forEach(cell => {
@@ -634,12 +501,7 @@ export class UIManager {
         });
     }
 
-    /**
-     * Enable Drag Mode.
-     * Allows users to drag and block/unblock cells.
-     */
     enableDragMode() {
-        // Enable dragging for cells
         const editableCells = this.gridContainer.querySelectorAll('.editable-cell');
         editableCells.forEach(cell => {
             cell.setAttribute('draggable', 'true');
@@ -649,10 +511,6 @@ export class UIManager {
         });
     }
 
-    /**
-     * Disable Drag Mode.
-     * Prevents dragging of cells.
-     */
     disableDragMode() {
         const draggableCells = this.gridContainer.querySelectorAll('.editable-cell[draggable="true"]');
         draggableCells.forEach(cell => {
@@ -663,35 +521,21 @@ export class UIManager {
         });
     }
 
-    /**
-     * Handle the start of a drag event.
-     * @param {DragEvent} event 
-     */
     handleDragStart(event) {
         this.isDragging = true;
         event.dataTransfer.setData('text/plain', `${event.target.dataset.row},${event.target.dataset.col}`);
     }
 
-    /**
-     * Handle dragging over a cell.
-     * @param {DragEvent} event 
-     */
     handleDragOver(event) {
-        event.preventDefault(); // Necessary to allow dropping
+        event.preventDefault();
     }
 
-    /**
-     * Handle the drop event on a cell.
-     * Toggles the blocked state of the target cell.
-     * @param {DragEvent} event 
-     */
     handleDrop(event) {
         event.preventDefault();
         const sourceData = event.dataTransfer.getData('text/plain');
         const targetRow = parseInt(event.target.dataset.row);
         const targetCol = parseInt(event.target.dataset.col);
 
-        // Toggle blocked state
         const currentValue = this.dataManager.grid[targetRow][targetCol];
         if (currentValue === '#') {
             this.dataManager.grid[targetRow][targetCol] = '.';
@@ -707,10 +551,8 @@ export class UIManager {
             event.target.contentEditable = "false";
         }
 
-        // Update the UI
         this.updateCellAppearance(event.target, currentValue === '#' ? '.' : '#');
 
-        // Push to undo stack
         this.pushToUndoStack({
             type: 'blockToggle',
             row: targetRow,
@@ -719,18 +561,12 @@ export class UIManager {
             newValue: this.dataManager.grid[targetRow][targetCol]
         });
 
-        // Clear redo stack
         this.redoStack = [];
         this.updateUndoRedoButtons();
 
         this.isDragging = false;
     }
 
-    /**
-     * Update the appearance of a cell based on its new value.
-     * @param {HTMLElement} cell 
-     * @param {string} value 
-     */
     updateCellAppearance(cell, value) {
         if (value === '#') {
             cell.classList.add('blocked-cell');
@@ -745,11 +581,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Display a solution in the Across and Down sections.
-     * @param {Object} solution - Object mapping slot names to words.
-     * @param {number} index - The index of the solution.
-     */
     displaySolution(solution, index) {
         let acrossText = `Solution ${index} - Across:\n`;
         let downText = `Solution ${index} - Down:\n`;
@@ -762,31 +593,20 @@ export class UIManager {
             }
         }
 
-        // Append to the displays
         this.acrossDisplay.value += acrossText + '\n';
         this.downDisplay.value += downText + '\n';
     }
 
-    /**
-     * Update the status display with a message.
-     * @param {string} message 
-     */
     updateStatus(message) {
         this.statusDisplay.value += `${message}\n`;
-        this.statusDisplay.scrollTop = this.statusDisplay.scrollHeight; // Auto-scroll to bottom
+        this.statusDisplay.scrollTop = this.statusDisplay.scrollHeight;
     }
 
-    /**
-     * Clear the word displays (Across and Down).
-     */
     clearWordDisplays() {
         this.acrossDisplay.value = '';
         this.downDisplay.value = '';
     }
 
-    /**
-     * Setup Generate Grid and Predefined Puzzles controls.
-     */
     setupGenerateAndPredefinedPuzzles() {
         const generateGridButton = document.getElementById('generate-grid-button');
         const loadEasyButton = document.getElementById('load-easy-button');
@@ -810,25 +630,15 @@ export class UIManager {
         }
     }
 
-    /**
-     * Handle Generate Grid button click.
-     */
     handleGenerateGrid() {
         this.generateGrid();
     }
 
-    /**
-     * Handle loading of predefined puzzles.
-     * @param {string} difficulty 
-     */
     handleLoadPredefinedPuzzle(difficulty) {
         this.loadPredefinedPuzzle(difficulty);
         this.updateStatus(`${difficulty} puzzle loaded.`);
     }
 
-    /**
-     * Setup Solve Crossword functionality by adding event listener to the solve button.
-     */
     setupSolveCrossword() {
         const solveCrosswordButton = document.getElementById('solve-crossword-button');
 
@@ -837,9 +647,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Handle Solve Crossword button click.
-     */
     handleSolveCrossword() {
         this.clearWordDisplays();
         this.updateStatus("Solving crossword...");
@@ -858,9 +665,6 @@ export class UIManager {
         }
     }
 
-    /**
-     * Generate a new grid based on user-specified dimensions.
-     */
     generateGrid() {
         const rowsInput = document.getElementById('rows-input');
         const colsInput = document.getElementById('columns-input');
@@ -879,10 +683,6 @@ export class UIManager {
         this.updateStatus(`New grid generated with ${rows} rows and ${cols} columns.`);
     }
 
-    /**
-     * Load a predefined puzzle into the grid.
-     * @param {string} difficulty - Difficulty level ('Easy', 'Medium', 'Hard').
-     */
     loadPredefinedPuzzle(difficulty) {
         this.dataManager.loadPredefinedPuzzle(difficulty);
         this.renderGrid();
