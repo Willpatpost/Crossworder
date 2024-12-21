@@ -39,6 +39,12 @@ export class UIManager {
         this.handleDragStart = this.handleDragStart.bind(this);
         this.handleDragOver = this.handleDragOver.bind(this);
         this.handleDrop = this.handleDrop.bind(this);
+        this.toggleNumberEntryMode = this.toggleNumberEntryMode.bind(this);
+        this.toggleLetterEntryMode = this.toggleLetterEntryMode.bind(this);
+        this.toggleDragMode = this.toggleDragMode.bind(this);
+        this.handleGenerateGrid = this.handleGenerateGrid.bind(this);
+        this.handleLoadPredefinedPuzzle = this.handleLoadPredefinedPuzzle.bind(this);
+        this.handleSolveCrossword = this.handleSolveCrossword.bind(this);
 
         // Drag Mode Tracking
         this.isDragging = false;
@@ -63,7 +69,14 @@ export class UIManager {
         // Setup Export/Import functionality
         this.setupExportImportControls();
 
-        // Accessibility: Keyboard navigation is handled by EventsManager
+        // Setup Mode Controls
+        this.setupModeControls();
+
+        // Setup Generate Grid and Predefined Puzzles
+        this.setupGenerateAndPredefinedPuzzles();
+
+        // Setup Solve Crossword
+        this.setupSolveCrossword();
 
         // Initialize word lists displays
         this.clearWordDisplays();
@@ -176,6 +189,7 @@ export class UIManager {
             });
             // Clear redo stack
             this.redoStack = [];
+            this.updateUndoRedoButtons();
         }
 
         // Highlight active slots
@@ -198,7 +212,6 @@ export class UIManager {
      * @param {Event} event 
      */
     handleCellBlur(event) {
-        const cell = event.target;
         this.clearActiveSlotHighlights();
     }
 
@@ -261,8 +274,18 @@ export class UIManager {
      */
     pushToUndoStack(action) {
         this.undoStack.push(action);
+        this.updateUndoRedoButtons();
+    }
+
+    /**
+     * Update the state (enabled/disabled) of Undo and Redo buttons.
+     */
+    updateUndoRedoButtons() {
         const undoButton = document.getElementById('undo-button');
-        if (undoButton) undoButton.disabled = false;
+        const redoButton = document.getElementById('redo-button');
+
+        if (undoButton) undoButton.disabled = this.undoStack.length === 0;
+        if (redoButton) redoButton.disabled = this.redoStack.length === 0;
     }
 
     /**
@@ -274,12 +297,7 @@ export class UIManager {
         const action = this.undoStack.pop();
         this.applyReverseAction(action);
         this.redoStack.push(action);
-
-        // Update buttons
-        const undoButton = document.getElementById('undo-button');
-        const redoButton = document.getElementById('redo-button');
-        if (undoButton) undoButton.disabled = this.undoStack.length === 0;
-        if (redoButton) redoButton.disabled = false;
+        this.updateUndoRedoButtons();
     }
 
     /**
@@ -291,472 +309,7 @@ export class UIManager {
         const action = this.redoStack.pop();
         this.applyAction(action);
         this.undoStack.push(action);
-
-        // Update buttons
-        const undoButton = document.getElementById('undo-button');
-        const redoButton = document.getElementById('redo-button');
-        if (undoButton) undoButton.disabled = false;
-        if (redoButton) redoButton.disabled = this.redoStack.length === 0;
-    }
-
-    /**
-     * Apply an action from the Undo stack.
-     * @param {Object} action 
-     */
-    applyReverseAction(action) {
-        const { type, row, col, oldValue, newValue } = action;
-        if (type === 'edit') {
-            this.updateCellContent(row, col, oldValue);
-            this.dataManager.grid[row][col] = oldValue;
-        }
-        // Handle other action types if added in the future
-    }
-
-    /**
-     * Reapply an action from the Redo stack.
-     * @param {Object} action 
-     */
-    applyAction(action) {
-        const { type, row, col, oldValue, newValue } = action;
-        if (type === 'edit') {
-            this.updateCellContent(row, col, newValue);
-            this.dataManager.grid[row][col] = newValue;
-        }
-        // Handle other action types if added in the future
-    }
-
-    /**
-     * Update the content of a specific cell without triggering events.
-     * @param {number} row 
-     * @param {number} col 
-     * @param {string} value 
-     */
-    updateCellContent(row, col, value) {
-        const cell = this.gridContainer.querySelector(`td[data-row="${row}"][data-col="${col}"]`);
-        if (cell && !cell.classList.contains('blocked-cell') && !cell.classList.contains('numbered-cell') && !cell.classList.contains('filled-cell')) {
-            cell.textContent = value;
-        }
-    }
-
-    /**
-     * Setup High Contrast and Font Size controls by adding event listeners to buttons.
-     */
-    setupAccessibilityControls() {
-        const highContrastButton = document.getElementById('high-contrast-button');
-        const increaseFontButton = document.getElementById('increase-font-button');
-        const decreaseFontButton = document.getElementById('decrease-font-button');
-
-        if (highContrastButton) {
-            highContrastButton.addEventListener('click', this.toggleHighContrast);
-        }
-
-        if (increaseFontButton) {
-            increaseFontButton.addEventListener('click', this.increaseFontSize);
-        }
-
-        if (decreaseFontButton) {
-            decreaseFontButton.addEventListener('click', this.decreaseFontSize);
-        }
-    }
-
-    /**
-     * Toggle High Contrast mode.
-     */
-    toggleHighContrast() {
-        this.isHighContrast = !this.isHighContrast;
-        if (this.isHighContrast) {
-            document.body.classList.add('high-contrast');
-            const highContrastButton = document.getElementById('high-contrast-button');
-            if (highContrastButton) highContrastButton.textContent = "Disable High Contrast";
-        } else {
-            document.body.classList.remove('high-contrast');
-            const highContrastButton = document.getElementById('high-contrast-button');
-            if (highContrastButton) highContrastButton.textContent = "Enable High Contrast";
-        }
-    }
-
-    /**
-     * Increase the font size of the grid and other text elements.
-     */
-    increaseFontSize() {
-        if (this.fontSize < 24) { // Maximum font size
-            this.fontSize += 2;
-            this.applyFontSize();
-        }
-    }
-
-    /**
-     * Decrease the font size of the grid and other text elements.
-     */
-    decreaseFontSize() {
-        if (this.fontSize > 12) { // Minimum font size
-            this.fontSize -= 2;
-            this.applyFontSize();
-        }
-    }
-
-    /**
-     * Apply the current font size to relevant elements.
-     */
-    applyFontSize() {
-        this.gridContainer.style.fontSize = `${this.fontSize}px`;
-        this.acrossDisplay.style.fontSize = `${this.fontSize}px`;
-        this.downDisplay.style.fontSize = `${this.fontSize}px`;
-        this.statusDisplay.style.fontSize = `${this.fontSize - 2}px`;
-    }
-
-    /**
-     * Setup Export and Import controls by adding event listeners to buttons.
-     */
-    setupExportImportControls() {
-        const exportButton = document.getElementById('export-button');
-        const importButton = document.getElementById('import-button');
-        const importFileInput = document.getElementById('import-file-input');
-
-        if (exportButton) {
-            exportButton.addEventListener('click', this.exportGrid);
-        }
-
-        if (importButton) {
-            importButton.addEventListener('click', () => importFileInput.click());
-        }
-
-        if (importFileInput) {
-            importFileInput.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                if (file) {
-                    this.importGrid(file);
-                }
-                // Reset the input value to allow re-importing the same file if needed
-                event.target.value = '';
-            });
-        }
-    }
-
-    /**
-     * Export the current crossword grid as a JSON file.
-     */
-    exportGrid() {
-        const gridData = {
-            grid: this.dataManager.grid,
-            slots: this.dataManager.slots
-        };
-        const dataStr = JSON.stringify(gridData, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'crossword_grid.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        this.updateStatus("Crossword grid exported as crossword_grid.json");
-    }
-
-    /**
-     * Import a crossword grid from a JSON file.
-     * @param {File} file 
-     */
-    importGrid(file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const importedData = JSON.parse(event.target.result);
-                if (!importedData.grid || !importedData.slots) {
-                    throw new Error("Invalid format. JSON should contain 'grid' and 'slots'.");
-                }
-
-                // Update the grid and slots in DataManager
-                this.dataManager.grid = importedData.grid;
-                this.dataManager.slots = importedData.slots;
-
-                // Re-render the grid
-                this.renderGrid();
-
-                // Clear undo/redo stacks
-                this.undoStack = [];
-                this.redoStack = [];
-                const undoButton = document.getElementById('undo-button');
-                const redoButton = document.getElementById('redo-button');
-                if (undoButton) undoButton.disabled = true;
-                if (redoButton) redoButton.disabled = true;
-
-                this.updateStatus("Crossword grid imported successfully.");
-                alert("Crossword grid imported successfully.");
-            } catch (error) {
-                alert(`Error importing crossword grid: ${error.message}`);
-            }
-        };
-        reader.onerror = () => {
-            alert("Error reading the file.");
-        };
-        reader.readAsText(file);
-    }
-
-    /**
-     * Toggle between Number Entry Mode.
-     */
-    toggleNumberEntryMode() {
-        this.currentMode = 'number';
-        this.updateModeLabel('Number Entry Mode');
-
-        // Enable numbered cells
-        this.enableNumberEntryMode();
-
-        // Disable other modes
-        this.disableLetterEntryMode();
-        this.disableDragMode();
-    }
-
-    /**
-     * Toggle between Letter Entry Mode.
-     */
-    toggleLetterEntryMode() {
-        this.currentMode = 'letter';
-        this.updateModeLabel('Letter Entry Mode');
-
-        // Enable letter entry
-        this.enableLetterEntryMode();
-
-        // Disable other modes
-        this.disableNumberEntryMode();
-        this.disableDragMode();
-    }
-
-    /**
-     * Toggle between Drag Mode.
-     */
-    toggleDragMode() {
-        this.currentMode = 'drag';
-        this.updateModeLabel('Drag Mode');
-
-        // Enable drag mode
-        this.enableDragMode();
-
-        // Disable other modes
-        this.disableNumberEntryMode();
-        this.disableLetterEntryMode();
-    }
-
-    /**
-     * Enable Number Entry Mode.
-     * Adds numbering to appropriate cells.
-     */
-    enableNumberEntryMode() {
-        // This implementation assumes that numbering is already present.
-        // If numbering needs to be generated, implement the logic here.
-        // For simplicity, we highlight numbered cells.
-        const numberedCells = this.gridContainer.querySelectorAll('.numbered-cell');
-        numberedCells.forEach(cell => {
-            cell.classList.add('highlight-number');
-        });
-    }
-
-    /**
-     * Disable Number Entry Mode.
-     * Removes numbering highlights.
-     */
-    disableNumberEntryMode() {
-        const highlightedCells = this.gridContainer.querySelectorAll('.highlight-number');
-        highlightedCells.forEach(cell => {
-            cell.classList.remove('highlight-number');
-        });
-    }
-
-    /**
-     * Enable Letter Entry Mode.
-     * Allows users to enter letters into cells.
-     */
-    enableLetterEntryMode() {
-        // Letter entry is the default mode; ensure cells are editable
-        const editableCells = this.gridContainer.querySelectorAll('.editable-cell');
-        editableCells.forEach(cell => {
-            cell.contentEditable = "true";
-        });
-    }
-
-    /**
-     * Disable Letter Entry Mode.
-     * Prevents users from entering letters into cells.
-     */
-    disableLetterEntryMode() {
-        const editableCells = this.gridContainer.querySelectorAll('.editable-cell');
-        editableCells.forEach(cell => {
-            cell.contentEditable = "false";
-        });
-    }
-
-    /**
-     * Enable Drag Mode.
-     * Allows users to drag and block/unblock cells.
-     */
-    enableDragMode() {
-        // Enable dragging for cells
-        const editableCells = this.gridContainer.querySelectorAll('.editable-cell');
-        editableCells.forEach(cell => {
-            cell.setAttribute('draggable', 'true');
-            cell.addEventListener('dragstart', this.handleDragStart);
-            cell.addEventListener('dragover', this.handleDragOver);
-            cell.addEventListener('drop', this.handleDrop);
-        });
-    }
-
-    /**
-     * Disable Drag Mode.
-     * Prevents dragging of cells.
-     */
-    disableDragMode() {
-        const draggableCells = this.gridContainer.querySelectorAll('.editable-cell[draggable="true"]');
-        draggableCells.forEach(cell => {
-            cell.removeAttribute('draggable');
-            cell.removeEventListener('dragstart', this.handleDragStart);
-            cell.removeEventListener('dragover', this.handleDragOver);
-            cell.removeEventListener('drop', this.handleDrop);
-        });
-    }
-
-    /**
-     * Handle the start of a drag event.
-     * @param {DragEvent} event 
-     */
-    handleDragStart(event) {
-        this.isDragging = true;
-        event.dataTransfer.setData('text/plain', `${event.target.dataset.row},${event.target.dataset.col}`);
-    }
-
-    /**
-     * Handle dragging over a cell.
-     * @param {DragEvent} event 
-     */
-    handleDragOver(event) {
-        event.preventDefault(); // Necessary to allow dropping
-    }
-
-    /**
-     * Handle the drop event on a cell.
-     * Toggles the blocked state of the target cell.
-     * @param {DragEvent} event 
-     */
-    handleDrop(event) {
-        event.preventDefault();
-        const sourceData = event.dataTransfer.getData('text/plain');
-        const targetRow = parseInt(event.target.dataset.row);
-        const targetCol = parseInt(event.target.dataset.col);
-
-        // Toggle blocked state
-        const currentValue = this.dataManager.grid[targetRow][targetCol];
-        if (currentValue === '#') {
-            this.dataManager.grid[targetRow][targetCol] = '.';
-            event.target.classList.remove('blocked-cell');
-            event.target.setAttribute('aria-label', 'Editable cell');
-            event.target.textContent = '';
-            event.target.contentEditable = this.currentMode === 'letter' ? "true" : "false";
-        } else {
-            this.dataManager.grid[targetRow][targetCol] = '#';
-            event.target.classList.add('blocked-cell');
-            event.target.setAttribute('aria-label', 'Blocked cell');
-            event.target.textContent = '#';
-            event.target.contentEditable = "false";
-        }
-
-        // Update the UI
-        this.updateCellAppearance(event.target, currentValue === '#' ? '.' : '#');
-
-        // Push to undo stack
-        this.pushToUndoStack({
-            type: 'blockToggle',
-            row: targetRow,
-            col: targetCol,
-            oldValue: currentValue,
-            newValue: this.dataManager.grid[targetRow][targetCol]
-        });
-
-        // Clear redo stack
-        this.redoStack = [];
-
-        this.isDragging = false;
-    }
-
-    /**
-     * Update the appearance of a cell based on its new value.
-     * @param {HTMLElement} cell 
-     * @param {string} value 
-     */
-    updateCellAppearance(cell, value) {
-        if (value === '#') {
-            cell.classList.add('blocked-cell');
-            cell.setAttribute('aria-label', 'Blocked cell');
-            cell.textContent = '#';
-            cell.contentEditable = "false";
-        } else {
-            cell.classList.remove('blocked-cell');
-            cell.setAttribute('aria-label', 'Editable cell');
-            cell.textContent = '';
-            cell.contentEditable = this.currentMode === 'letter' ? "true" : "false";
-        }
-    }
-
-    /**
-     * Setup Undo and Redo functionality by adding event listeners to buttons.
-     */
-    setupUndoRedo() {
-        const undoButton = document.getElementById('undo-button');
-        const redoButton = document.getElementById('redo-button');
-
-        if (undoButton) {
-            undoButton.addEventListener('click', this.performUndo);
-        }
-
-        if (redoButton) {
-            redoButton.addEventListener('click', this.performRedo);
-        }
-
-        // Initially disable Undo and Redo buttons
-        if (undoButton) undoButton.disabled = true;
-        if (redoButton) redoButton.disabled = true;
-    }
-
-    /**
-     * Push an action to the Undo stack.
-     * @param {Object} action 
-     */
-    pushToUndoStack(action) {
-        this.undoStack.push(action);
-        const undoButton = document.getElementById('undo-button');
-        if (undoButton) undoButton.disabled = false;
-    }
-
-    /**
-     * Perform Undo operation.
-     */
-    performUndo() {
-        if (this.undoStack.length === 0) return;
-
-        const action = this.undoStack.pop();
-        this.applyReverseAction(action);
-        this.redoStack.push(action);
-
-        // Update buttons
-        const undoButton = document.getElementById('undo-button');
-        const redoButton = document.getElementById('redo-button');
-        if (undoButton) undoButton.disabled = this.undoStack.length === 0;
-        if (redoButton) redoButton.disabled = false;
-    }
-
-    /**
-     * Perform Redo operation.
-     */
-    performRedo() {
-        if (this.redoStack.length === 0) return;
-
-        const action = this.redoStack.pop();
-        this.applyAction(action);
-        this.undoStack.push(action);
-
-        // Update buttons
-        const undoButton = document.getElementById('undo-button');
-        const redoButton = document.getElementById('redo-button');
-        if (undoButton) undoButton.disabled = false;
-        if (redoButton) redoButton.disabled = this.redoStack.length === 0;
+        this.updateUndoRedoButtons();
     }
 
     /**
@@ -942,10 +495,7 @@ export class UIManager {
                 // Clear undo/redo stacks
                 this.undoStack = [];
                 this.redoStack = [];
-                const undoButton = document.getElementById('undo-button');
-                const redoButton = document.getElementById('redo-button');
-                if (undoButton) undoButton.disabled = true;
-                if (redoButton) redoButton.disabled = true;
+                this.updateUndoRedoButtons();
 
                 this.updateStatus("Crossword grid imported successfully.");
                 alert("Crossword grid imported successfully.");
@@ -957,6 +507,27 @@ export class UIManager {
             alert("Error reading the file.");
         };
         reader.readAsText(file);
+    }
+
+    /**
+     * Setup Mode Controls by adding event listeners to mode buttons.
+     */
+    setupModeControls() {
+        const numberEntryButton = document.getElementById('number-entry-button');
+        const letterEntryButton = document.getElementById('letter-entry-button');
+        const dragModeButton = document.getElementById('drag-mode-button');
+
+        if (numberEntryButton) {
+            numberEntryButton.addEventListener('click', this.toggleNumberEntryMode);
+        }
+
+        if (letterEntryButton) {
+            letterEntryButton.addEventListener('click', this.toggleLetterEntryMode);
+        }
+
+        if (dragModeButton) {
+            dragModeButton.addEventListener('click', this.toggleDragMode);
+        }
     }
 
     /**
@@ -1150,6 +721,7 @@ export class UIManager {
 
         // Clear redo stack
         this.redoStack = [];
+        this.updateUndoRedoButtons();
 
         this.isDragging = false;
     }
@@ -1213,13 +785,77 @@ export class UIManager {
     }
 
     /**
-     * Load a predefined puzzle into the grid.
-     * @param {string} difficulty - Difficulty level ('Easy', 'Medium', 'Hard').
+     * Setup Generate Grid and Predefined Puzzles controls.
      */
-    loadPredefinedPuzzle(difficulty) {
-        this.dataManager.loadPredefinedPuzzle(difficulty);
-        this.renderGrid();
+    setupGenerateAndPredefinedPuzzles() {
+        const generateGridButton = document.getElementById('generate-grid-button');
+        const loadEasyButton = document.getElementById('load-easy-button');
+        const loadMediumButton = document.getElementById('load-medium-button');
+        const loadHardButton = document.getElementById('load-hard-button');
+
+        if (generateGridButton) {
+            generateGridButton.addEventListener('click', this.handleGenerateGrid);
+        }
+
+        if (loadEasyButton) {
+            loadEasyButton.addEventListener('click', () => this.handleLoadPredefinedPuzzle('Easy'));
+        }
+
+        if (loadMediumButton) {
+            loadMediumButton.addEventListener('click', () => this.handleLoadPredefinedPuzzle('Medium'));
+        }
+
+        if (loadHardButton) {
+            loadHardButton.addEventListener('click', () => this.handleLoadPredefinedPuzzle('Hard'));
+        }
+    }
+
+    /**
+     * Handle Generate Grid button click.
+     */
+    handleGenerateGrid() {
+        this.generateGrid();
+    }
+
+    /**
+     * Handle loading of predefined puzzles.
+     * @param {string} difficulty 
+     */
+    handleLoadPredefinedPuzzle(difficulty) {
+        this.loadPredefinedPuzzle(difficulty);
+        this.updateStatus(`${difficulty} puzzle loaded.`);
+    }
+
+    /**
+     * Setup Solve Crossword functionality by adding event listener to the solve button.
+     */
+    setupSolveCrossword() {
+        const solveCrosswordButton = document.getElementById('solve-crossword-button');
+
+        if (solveCrosswordButton) {
+            solveCrosswordButton.addEventListener('click', this.handleSolveCrossword);
+        }
+    }
+
+    /**
+     * Handle Solve Crossword button click.
+     */
+    handleSolveCrossword() {
         this.clearWordDisplays();
+        this.updateStatus("Solving crossword...");
+
+        const solutions = this.solver.findAllSolutions(this.dataManager.grid, this.dataManager.words);
+
+        if (solutions.length === 0) {
+            this.updateStatus("No solutions found.");
+            alert("No solutions found for the current grid.");
+        } else {
+            solutions.forEach((solution, index) => {
+                this.displaySolution(solution, index + 1);
+            });
+            this.updateStatus(`${solutions.length} solution(s) found.`);
+            alert(`${solutions.length} solution(s) found and displayed.`);
+        }
     }
 
     /**
@@ -1241,5 +877,15 @@ export class UIManager {
         this.renderGrid();
         this.clearWordDisplays();
         this.updateStatus(`New grid generated with ${rows} rows and ${cols} columns.`);
+    }
+
+    /**
+     * Load a predefined puzzle into the grid.
+     * @param {string} difficulty - Difficulty level ('Easy', 'Medium', 'Hard').
+     */
+    loadPredefinedPuzzle(difficulty) {
+        this.dataManager.loadPredefinedPuzzle(difficulty);
+        this.renderGrid();
+        this.clearWordDisplays();
     }
 }
