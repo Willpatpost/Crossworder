@@ -1,2 +1,2 @@
-# ActualCrossWorderTest
-The actual testing repository for CrossWorder (not to be confused with CrossWorderTest).
+# CrossWorder
+The official code repository for CrossWorder's static website!
