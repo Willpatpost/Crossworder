@@ -1,2 +1,2 @@
 # CrossWorder
-The official code repository for CrossWorder's static website!
+The official code repository for CrossWorder's static GitHub website!
