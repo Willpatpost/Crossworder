@@ -1,4 +1,5 @@
 <!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,8 +47,7 @@
             </div>
         </section>
 
-        <!-- Word Lookup Section
-             (Dynamically enhanced by CrosswordSolver.js) -->
+        <!-- Word Lookup Section -->
         <section class="word-lookup-section">
             <h2>Word Lookup</h2>
             <div class="search-container">
@@ -59,6 +59,21 @@
                 />
                 <div id="search-dropdown"></div>
                 <div id="matches-count"></div>
+            </div>
+
+            <!-- External Lookup Alternative -->
+            <div class="external-lookup">
+                <p class="disclaimer">
+                    *Some definitions in this tool may be missing or incomplete due to parsing limitations of the source data.*
+                </p>
+                <a
+                    href="https://www.wiktionary.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="external-link"
+                >
+                    Look up definitions on Wiktionary
+                </a>
             </div>
         </section>
 
@@ -85,7 +100,6 @@
                 <button id="number-entry-button" class="btn mode-btn">
                     Number Entry Mode
                 </button>
-                <!-- Moved the "Auto Number" button to be next to the Number Entry Mode button -->
                 <button id="auto-number-button" class="btn secondary-btn">
                     Auto Number
                 </button>
@@ -110,19 +124,17 @@
 
             <!-- Grid Container -->
             <div class="grid-container" id="grid-container">
-                <!-- Crossword grid is dynamically generated here by main.js / CrosswordSolver.js -->
+                <!-- Crossword grid is dynamically generated here -->
             </div>
 
             <!-- Word Lists -->
             <div class="word-lists-container">
                 <div class="word-list">
                     <h3>Across</h3>
-                    <!-- Replaced <textarea> with a scrollable <div> -->
                     <div id="across-display" class="word-list-display"></div>
                 </div>
                 <div class="word-list">
                     <h3>Down</h3>
-                    <!-- Replaced <textarea> with a scrollable <div> -->
                     <div id="down-display" class="word-list-display"></div>
                 </div>
             </div>
