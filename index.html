@@ -1,0 +1,769 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CROSSWORDER</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div class="app-container">
+        <div id="live-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- NAVBAR -->
+        <nav class="navbar" aria-label="Primary navigation">
+            <div class="nav-left">
+                <h1 class="nav-logo" id="nav-logo" role="button" tabindex="0" aria-label="Go to home screen">
+                    CROSSWORDER
+                </h1>
+            </div>
+
+            <div class="nav-center" role="tablist" aria-label="App sections">
+                <button class="nav-btn active" id="nav-home" data-target="home-screen" type="button" role="tab"
+                    aria-controls="home-screen" aria-selected="true">
+                    Home
+                </button>
+                <button class="nav-btn" id="nav-editor" data-target="editor-screen" type="button" role="tab"
+                    aria-controls="editor-screen" aria-selected="false">
+                    Editor
+                </button>
+                <button class="nav-btn" id="nav-play" data-target="play-screen" type="button" role="tab"
+                    aria-controls="play-screen" aria-selected="false">
+                    Play
+                </button>
+            </div>
+
+            <div class="nav-right">
+                <button id="theme-toggle-button" class="btn secondary-btn" type="button" aria-label="Toggle dark mode">
+                    🌓 Theme
+                </button>
+            </div>
+        </nav>
+
+        <!-- MAIN APP CONTAINER -->
+        <main id="app-main">
+
+            <!-- HOME -->
+            <section id="home-screen" class="view-section" aria-labelledby="home-heading">
+                <section class="home-hero">
+                    <div class="hero-copy">
+                        <p class="hero-kicker">Construct. Solve. Play.</p>
+                        <h1 id="home-heading">A crossword workshop with a live solving engine.</h1>
+                        <p class="hero-subcopy">
+                            Build grids, lock in theme letters, search candidate fills, and jump into play mode
+                            without leaving the same workspace.
+                        </p>
+                        <div class="hero-actions">
+                            <button class="btn primary-btn home-action-btn" type="button" data-home-target="editor-screen">
+                                Open Editor
+                            </button>
+                            <button class="btn secondary-btn home-action-btn" type="button" data-home-target="play-screen">
+                                Try Play Mode
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hero-spotlight" aria-hidden="true">
+                        <div class="spotlight-card spotlight-primary">
+                            <span class="spotlight-label">Live Workspace</span>
+                            <strong>Design symmetrical layouts and test fills fast.</strong>
+                        </div>
+                        <div class="spotlight-card spotlight-secondary">
+                            <span class="spotlight-label">Built-In Data</span>
+                            <strong>Word lists, clue history, and bundled puzzles are ready on load.</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="home-stats" aria-label="Project highlights">
+                    <article class="stat-card">
+                        <span id="home-stat-bundled" class="stat-value">3</span>
+                        <span class="stat-label">Bundled puzzles</span>
+                    </article>
+                    <article class="stat-card">
+                        <span id="home-stat-completed" class="stat-value">0</span>
+                        <span class="stat-label">Completed puzzles</span>
+                    </article>
+                    <article class="stat-card">
+                        <span id="home-stat-recent" class="stat-value">0</span>
+                        <span class="stat-label">Recent workspace</span>
+                    </article>
+                    <article class="stat-card">
+                        <span id="home-stat-streak" class="stat-value">0</span>
+                        <span class="stat-label">Daily streak</span>
+                    </article>
+                    <article class="stat-card">
+                        <span id="home-stat-wordlists" class="stat-value">19</span>
+                        <span class="stat-label">Word-length libraries</span>
+                    </article>
+                </section>
+
+                <section class="section home-onboarding" aria-labelledby="home-onboarding-heading">
+                    <div class="home-library-header">
+                        <div>
+                            <p class="card-eyebrow">Start Here</p>
+                            <h2 id="home-onboarding-heading">A quick path if you want to learn the workspace fast.</h2>
+                            <p class="muted-text">
+                                You can treat Crossworder as a constructor, a solver, or a play app. These are the
+                                smoothest ways to begin.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="home-grid">
+                        <article class="info-card home-onboarding-card">
+                            <span class="workflow-number">01</span>
+                            <h3>Open a bundled puzzle</h3>
+                            <p>Use Easy or the puzzle library to see a complete grid, clue set, and play-ready flow.</p>
+                        </article>
+
+                        <article class="info-card home-onboarding-card">
+                            <span class="workflow-number">02</span>
+                            <h3>Try the editor loop</h3>
+                            <p>Type directly in the grid, add clues, use undo/redo, and save a local draft automatically.</p>
+                        </article>
+
+                        <article class="info-card home-onboarding-card">
+                            <span class="workflow-number">03</span>
+                            <h3>Lean on the solver</h3>
+                            <p>Suggest a fill, solve one word, blacklist bad entries, or run a full deterministic solve.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="home-daily section" aria-labelledby="daily-puzzle-heading">
+                    <div class="daily-puzzle-copy">
+                        <p class="card-eyebrow">Daily Puzzle</p>
+                        <h2 id="daily-puzzle-heading">A fresh crossword, picked and solved automatically every night.</h2>
+                        <p id="daily-puzzle-summary" class="daily-puzzle-summary">
+                            Loading today’s puzzle details...
+                        </p>
+                        <p id="daily-puzzle-progress" class="daily-puzzle-summary">
+                            Daily completions and streaks will appear here after you finish a daily puzzle.
+                        </p>
+                    </div>
+                    <div class="daily-puzzle-actions">
+                        <button id="load-daily-editor-button" class="btn primary-btn" type="button">
+                            Load in Editor
+                        </button>
+                        <button id="play-daily-button" class="btn secondary-btn" type="button">
+                            Play Today’s Puzzle
+                        </button>
+                    </div>
+                </section>
+
+                <section class="home-daily home-recent section" aria-labelledby="recent-puzzle-heading">
+                    <div class="daily-puzzle-copy">
+                        <p class="card-eyebrow">Recent Puzzle</p>
+                        <h2 id="recent-puzzle-heading">Pick up where your last crossword session left off.</h2>
+                        <p id="recent-puzzle-summary" class="daily-puzzle-summary">
+                            No recent puzzle workspace is saved yet.
+                        </p>
+                        <p id="recent-completion-summary" class="daily-puzzle-summary">
+                            Completed puzzles will appear here once you finish a play session.
+                        </p>
+                    </div>
+                    <div class="daily-puzzle-actions">
+                        <button id="resume-recent-editor-button" class="btn primary-btn" type="button" disabled>
+                            Resume in Editor
+                        </button>
+                        <button id="play-recent-button" class="btn secondary-btn" type="button" disabled>
+                            Play Recent Puzzle
+                        </button>
+                    </div>
+                </section>
+
+                <section class="section home-library" aria-labelledby="home-library-heading">
+                    <div class="home-library-header">
+                        <div>
+                            <p class="card-eyebrow">Puzzle Library</p>
+                            <h2 id="home-library-heading">Browse bundled puzzles without leaving the home screen.</h2>
+                            <p id="home-puzzle-library-summary" class="muted-text">
+                                Loading bundled puzzle library...
+                            </p>
+                        </div>
+                        <div class="settings-controls home-library-controls">
+                            <div class="input-group metadata-field">
+                                <label for="home-puzzle-search">Search</label>
+                                <input
+                                    type="text"
+                                    id="home-puzzle-search"
+                                    placeholder="Title, author, or id"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                />
+                            </div>
+                            <div class="input-group metadata-field">
+                                <label for="home-puzzle-sort">Sort</label>
+                                <select id="home-puzzle-sort">
+                                    <option value="title">Title</option>
+                                    <option value="date-desc">Newest</option>
+                                    <option value="author">Author</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="home-puzzle-library" class="home-library-grid" aria-live="polite"></div>
+                </section>
+
+                <section class="home-grid home-dashboard-grid" aria-label="Featured puzzle recommendations">
+                    <article class="info-card home-dashboard-card">
+                        <p class="card-eyebrow">Featured</p>
+                        <h2 id="home-featured-title">Loading featured puzzle...</h2>
+                        <p id="home-featured-summary" class="muted-text">
+                            We’re selecting a featured puzzle from the bundled library.
+                        </p>
+                        <div class="daily-puzzle-actions">
+                            <button id="home-featured-editor-button" class="btn primary-btn" type="button" disabled>
+                                Load Featured
+                            </button>
+                            <button id="home-featured-play-button" class="btn secondary-btn" type="button" disabled>
+                                Play Featured
+                            </button>
+                        </div>
+                    </article>
+
+                    <article class="info-card home-dashboard-card">
+                        <p class="card-eyebrow">Recommended</p>
+                        <h2 id="home-recommended-title">Loading recommendation...</h2>
+                        <p id="home-recommended-summary" class="muted-text">
+                            We’re looking for the best next puzzle based on your recent progress.
+                        </p>
+                        <div class="daily-puzzle-actions">
+                            <button id="home-recommended-editor-button" class="btn primary-btn" type="button" disabled>
+                                Load Recommended
+                            </button>
+                            <button id="home-recommended-play-button" class="btn secondary-btn" type="button" disabled>
+                                Play Recommended
+                            </button>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="home-grid home-grid-featured">
+                    <article class="info-card feature-card">
+                        <p class="card-eyebrow">Editor</p>
+                        <h2>Shape a puzzle instead of fighting a blank page.</h2>
+                        <p>
+                            Generate a grid, paint blocks with symmetry, seed letters for a theme, and inspect
+                            across/down entries as the structure evolves.
+                        </p>
+                    </article>
+
+                    <article class="info-card feature-card">
+                        <p class="card-eyebrow">Solver</p>
+                        <h2>Use constraint-based filling when the crossings get tough.</h2>
+                        <p>
+                            Crossworder narrows domains by slot length and crossings, then searches for valid fills
+                            in a worker so the UI stays responsive.
+                        </p>
+                    </article>
+
+                    <article class="info-card feature-card">
+                        <p class="card-eyebrow">Play</p>
+                        <h2>Turn a finished grid into a playable puzzle immediately.</h2>
+                        <p>
+                            Switch into play mode for clue browsing, timer tracking, pause controls, and
+                            check/reveal tools inspired by digital crossword apps.
+                        </p>
+                    </article>
+                </section>
+
+                <section class="home-flow section" aria-labelledby="workflow-heading">
+                    <h2 id="workflow-heading">How It Flows</h2>
+                    <div class="workflow-grid">
+                        <article class="workflow-step">
+                            <span class="workflow-number">01</span>
+                            <h3>Sketch the grid</h3>
+                            <p>Start from a bundled puzzle or generate a blank board with your own dimensions.</p>
+                        </article>
+                        <article class="workflow-step">
+                            <span class="workflow-number">02</span>
+                            <h3>Guide the fill</h3>
+                            <p>Enter letters, search patterns like <code>C??T</code>, and shape the constraint space.</p>
+                        </article>
+                        <article class="workflow-step">
+                            <span class="workflow-number">03</span>
+                            <h3>Solve or play</h3>
+                            <p>Run the solver, inspect clue history, then hand the grid off to play mode.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="home-grid">
+                    <article class="info-card">
+                        <h2>Why This Exists</h2>
+                        <p>
+                            Crossworder is built for iterative construction: you can move from rough structure,
+                            to assisted fill, to live solving without bouncing between separate tools.
+                        </p>
+                    </article>
+
+                    <article class="info-card">
+                        <h2>What’s Bundled</h2>
+                        <p>
+                            The project ships with local word lists, clue history by word length, and starter
+                            puzzle JSON files under <code>data/puzzles/</code>.
+                        </p>
+                    </article>
+
+                    <article class="info-card">
+                        <h2>Good Starting Point</h2>
+                        <p>
+                            Open the editor, click <strong>Easy</strong>, inspect the slot list, and then run the
+                            solver to see how the workspace hangs together.
+                        </p>
+                    </article>
+                </section>
+            </section>
+
+            <!-- EDITOR -->
+            <section id="editor-screen" class="view-section hidden" aria-labelledby="editor-heading">
+                <header class="section screen-header">
+                    <h1 id="editor-heading">Editor</h1>
+                    <p>Build your grid, run the solver, and inspect entries and clues.</p>
+                </header>
+
+                <!-- QUICK LOAD -->
+                <section class="section predefined-puzzles-section" aria-labelledby="quick-load-heading">
+                    <h2 id="quick-load-heading">Quick Load</h2>
+                    <p class="section-helper">
+                        Start from a bundled puzzle if you want a complete grid fast, or generate a blank board below if
+                        you want to construct from scratch.
+                    </p>
+                    <div class="button-group">
+                        <button id="load-easy-button" class="btn secondary-btn" type="button">Easy</button>
+                        <button id="load-medium-button" class="btn secondary-btn" type="button">Medium</button>
+                        <button id="load-hard-button" class="btn secondary-btn" type="button">Hard</button>
+                        <button id="random-puzzle-button" class="btn accent-btn" type="button">Random Puzzle</button>
+                    </div>
+                </section>
+
+                <!-- GRID SETTINGS -->
+                <section class="section settings-section" aria-labelledby="grid-settings-heading">
+                    <h2 id="grid-settings-heading">Grid Settings</h2>
+                    <div class="settings-controls">
+                        <div class="input-group">
+                            <label for="rows-input">Rows</label>
+                            <input type="number" id="rows-input" min="5" max="25" value="15" inputmode="numeric" />
+                        </div>
+
+                        <div class="input-group">
+                            <label for="columns-input">Columns</label>
+                            <input type="number" id="columns-input" min="5" max="25" value="15" inputmode="numeric" />
+                        </div>
+
+                        <button id="generate-grid-button" class="btn primary-btn" type="button">
+                            Generate Grid
+                        </button>
+                    </div>
+                </section>
+
+                <section class="section settings-section" aria-labelledby="puzzle-metadata-heading">
+                    <h2 id="puzzle-metadata-heading">Puzzle Metadata</h2>
+                    <p class="section-helper">
+                        These fields travel with drafts and exports, so you can treat the current workspace like a real
+                        puzzle package instead of a loose grid.
+                    </p>
+                    <div class="settings-controls metadata-controls">
+                        <div class="input-group metadata-field">
+                            <label for="puzzle-title-input">Title</label>
+                            <input type="text" id="puzzle-title-input" placeholder="Untitled puzzle" autocomplete="off" spellcheck="false" />
+                        </div>
+
+                        <div class="input-group metadata-field">
+                            <label for="puzzle-author-input">Author</label>
+                            <input type="text" id="puzzle-author-input" placeholder="Author name" autocomplete="off" spellcheck="false" />
+                        </div>
+
+                        <div class="input-group metadata-field">
+                            <label for="puzzle-difficulty-input">Difficulty</label>
+                            <input type="text" id="puzzle-difficulty-input" placeholder="Easy / Medium / Hard" autocomplete="off" spellcheck="false" />
+                        </div>
+
+                        <div class="input-group metadata-field">
+                            <label for="puzzle-tags-input">Tags</label>
+                            <input type="text" id="puzzle-tags-input" placeholder="theme, themeless, mini" autocomplete="off" spellcheck="false" />
+                        </div>
+
+                        <div class="input-group metadata-field">
+                            <label for="puzzle-copyright-input">Copyright</label>
+                            <input type="text" id="puzzle-copyright-input" placeholder="Optional copyright or rights note" autocomplete="off" spellcheck="false" />
+                        </div>
+
+                        <div class="input-group metadata-field">
+                            <label for="puzzle-source-url-input">Source URL</label>
+                            <input type="text" id="puzzle-source-url-input" placeholder="https://example.com/puzzle" autocomplete="off" spellcheck="false" />
+                        </div>
+
+                        <div class="input-group metadata-field metadata-field-wide">
+                            <label for="puzzle-notes-input">Notes</label>
+                            <textarea id="puzzle-notes-input" rows="3" placeholder="Optional notes, theme, or constructor comments"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- EDITOR CONTROLS -->
+                <section class="section mode-section" aria-labelledby="editor-controls-heading">
+                    <h2 id="editor-controls-heading">Editor Controls</h2>
+
+                    <div class="mode-controls">
+
+                        <!-- Interaction Mode -->
+                        <div class="mode-group" role="group" aria-label="Interaction mode">
+                            <button id="drag-mode-button" class="btn mode-btn" type="button">Drag</button>
+                            <button id="letter-mode-button" class="btn mode-btn" type="button">Letter</button>
+                        </div>
+
+                        <!-- Grid Tools -->
+                        <div class="mode-group" role="group" aria-label="Grid tools">
+                            <button id="auto-number-button" class="btn secondary-btn" type="button">
+                                Auto Number
+                            </button>
+                            <button id="symmetry-button" class="btn success-btn" type="button">
+                                Symmetry: ON
+                            </button>
+                            <button id="undo-button" class="btn secondary-btn" type="button">
+                                Undo
+                            </button>
+                            <button id="redo-button" class="btn secondary-btn" type="button">
+                                Redo
+                            </button>
+                            <button id="save-draft-button" class="btn secondary-btn" type="button">
+                                Save Draft
+                            </button>
+                            <button id="load-draft-button" class="btn secondary-btn" type="button">
+                                Load Draft
+                            </button>
+                            <button id="clear-draft-button" class="btn secondary-btn" type="button">
+                                Clear Saved Draft
+                            </button>
+                            <button id="clear-letters-button" class="btn secondary-btn" type="button">
+                                Clear Letters
+                            </button>
+                            <button id="clear-blocks-button" class="btn secondary-btn" type="button">
+                                Clear Blocks
+                            </button>
+                            <button id="clear-grid-button" class="btn secondary-btn" type="button">
+                                Clear Grid
+                            </button>
+                            <button id="clear-row-button" class="btn secondary-btn" type="button">
+                                Clear Row
+                            </button>
+                            <button id="clear-column-button" class="btn secondary-btn" type="button">
+                                Clear Column
+                            </button>
+                            <button id="export-puzzle-button" class="btn secondary-btn" type="button">
+                                Export Puzzle
+                            </button>
+                            <button id="import-puzzle-button" class="btn secondary-btn" type="button">
+                                Import Puzzle
+                            </button>
+                            <input id="import-puzzle-input" class="sr-only" type="file" accept="application/json,.json" />
+                        </div>
+
+                        <!-- Solver Actions -->
+                        <div class="mode-group" role="group" aria-label="Solver actions">
+                            <button id="solve-crossword-button" class="btn solve-btn" type="button">
+                                Solve &amp; Generate Clues
+                            </button>
+                            <button id="solve-selected-word-button" class="btn secondary-btn" type="button">
+                                Solve Selected Word
+                            </button>
+                            <button id="suggest-fill-button" class="btn secondary-btn" type="button">
+                                Suggest Fill
+                            </button>
+                            <button id="blacklist-entry-button" class="btn secondary-btn" type="button">
+                                Blacklist Entry
+                            </button>
+                            <button id="cancel-solve-button" class="btn danger-btn hidden" type="button">
+                                Cancel Solve
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="mode-label" class="mode-label" aria-live="polite">
+                        Mode: Default (Toggle Black Squares)
+                    </div>
+                </section>
+
+                <!-- SOLVING CONTROLS -->
+                <section class="section solving-controls-section" aria-labelledby="solving-controls-heading">
+                    <h2 id="solving-controls-heading">Solving Controls</h2>
+                    <p class="section-helper">
+                        Use these options when you want help filling the grid. Locked entries stay fixed, theme entries
+                        get prioritized, and deterministic mode makes repeated runs easier to compare.
+                    </p>
+                    <div class="settings-controls">
+                        <label class="toggle-container" for="allow-reuse-toggle">
+                            <input type="checkbox" id="allow-reuse-toggle" />
+                            <span>Allow Word Reuse</span>
+                        </label>
+
+                        <label class="toggle-container" for="lock-filled-toggle">
+                            <input type="checkbox" id="lock-filled-toggle" checked />
+                            <span>Lock Filled Entries</span>
+                        </label>
+
+                        <label class="toggle-container" for="deterministic-solve-toggle">
+                            <input type="checkbox" id="deterministic-solve-toggle" />
+                            <span>Deterministic Solve</span>
+                        </label>
+
+                        <label class="toggle-container" for="visualize-solve-toggle">
+                            <input type="checkbox" id="visualize-solve-toggle" checked />
+                            <span>Visualize Solve</span>
+                        </label>
+
+                        <div class="input-group">
+                            <label for="visualize-speed-select">Visual Speed</label>
+                            <select id="visualize-speed-select">
+                                <option value="fast">Fast</option>
+                                <option value="slow">Slow</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group solver-theme-group">
+                        <label for="theme-entries-input">Theme Entries</label>
+                        <input
+                            type="text"
+                            id="theme-entries-input"
+                            placeholder="Comma-separated entries to prioritize (e.g. CAT,NOVA)"
+                            autocomplete="off"
+                            spellcheck="false"
+                        />
+                    </div>
+
+                    <div id="solver-metrics" class="solver-metrics" aria-live="polite">
+                        <div class="summary-item summary-item-wide">
+                            <span class="summary-value">No solve yet</span>
+                            <span class="summary-label">Run the solver to inspect timing, search depth, and pruning.</span>
+                        </div>
+                    </div>
+
+                    <div id="solver-diagnostics" class="solver-diagnostics muted-text" aria-live="polite">
+                        Detailed solver diagnostics will appear here after a solve.
+                    </div>
+
+                    <section class="solver-blacklist-panel" aria-labelledby="solver-blacklist-heading">
+                        <h3 id="solver-blacklist-heading">Blacklisted Fills</h3>
+                        <div id="solver-blacklist-list" class="solver-blacklist-list muted-text">
+                            No fills are blacklisted yet.
+                        </div>
+                    </section>
+                </section>
+
+                <!-- WORD LOOKUP -->
+                <section class="section word-lookup-section" aria-labelledby="word-lookup-heading">
+                    <h2 id="word-lookup-heading">Word Lookup</h2>
+                    <p class="section-helper">
+                        Search by answer pattern with <code>?</code> wildcards, or switch to clue search when you know
+                        the clue idea but not the fill yet.
+                    </p>
+                    <div class="search-container">
+                        <label for="word-search-mode" class="sr-only">Search mode</label>
+                        <select id="word-search-mode" aria-label="Search mode">
+                            <option value="answer">Answer Patterns</option>
+                            <option value="clue">Clue Text</option>
+                        </select>
+                        <label for="word-search-input" class="sr-only">Search words by pattern</label>
+                        <input type="text" id="word-search-input" placeholder="Search (use ? for wildcards, e.g. C??T)"
+                            autocomplete="off" spellcheck="false" aria-describedby="matches-count" />
+                        <div id="search-dropdown" class="search-dropdown" role="listbox"
+                            aria-label="Word search results"></div>
+                    </div>
+                    <div id="matches-count" class="matches-count" aria-live="polite"></div>
+                </section>
+
+                <!-- EDITOR WORKSPACE -->
+                <section class="section workspace-section" aria-labelledby="editor-workspace-heading">
+                    <h2 id="editor-workspace-heading">Workspace</h2>
+
+                    <div id="puzzle-summary" class="puzzle-summary" aria-label="Puzzle summary"></div>
+
+                    <div class="main-content editor-workspace" id="editor-workspace">
+
+                        <aside class="status-panel" aria-labelledby="status-heading">
+                            <h3 id="status-heading">Status</h3>
+                            <textarea id="status-display" readonly aria-label="Solver status log"></textarea>
+
+                        </aside>
+
+                        <section class="grid-panel" aria-labelledby="editor-grid-heading">
+                            <h3 id="editor-grid-heading">Grid</h3>
+                            <div class="grid-container" id="grid-container" aria-label="Crossword editor grid"></div>
+                        </section>
+
+                        <aside class="clues-panel" aria-labelledby="editor-clues-heading">
+                            <h3 id="editor-clues-heading">Entries</h3>
+
+                            <section class="clue-composer" aria-labelledby="editor-clue-composer-heading">
+                                <h4 id="editor-clue-composer-heading">Clue Composer</h4>
+                                <p id="editor-clue-slot-label" class="composer-slot-label muted-text">
+                                    Select an entry to add or edit its clue.
+                                </p>
+                                <p id="editor-clue-preview" class="composer-preview muted-text">
+                                    Entry preview will appear here.
+                                </p>
+                                <label for="editor-clue-input" class="sr-only">Clue text for the selected entry</label>
+                                <input type="text" id="editor-clue-input" placeholder="Write a clue for the selected entry"
+                                    autocomplete="off" spellcheck="false" />
+                                <div class="button-group">
+                                    <button id="save-clue-button" class="btn secondary-btn" type="button">
+                                        Save Clue
+                                    </button>
+                                    <button id="clear-clue-button" class="btn secondary-btn" type="button">
+                                        Clear Clue
+                                    </button>
+                                </div>
+                            </section>
+
+                            <div class="word-list">
+                                <h4>Across</h4>
+                                <div id="across-display" class="word-list-display"></div>
+                            </div>
+
+                            <div class="word-list">
+                                <h4>Down</h4>
+                                <div id="down-display" class="word-list-display"></div>
+                            </div>
+                        </aside>
+
+                    </div>
+                </section>
+            </section>
+
+            <!-- PLAY -->
+            <section id="play-screen" class="view-section hidden" aria-labelledby="play-heading">
+                <header class="section screen-header">
+                    <h1 id="play-heading">Play</h1>
+                    <p>Interactive play view with check and reveal tools.</p>
+                </header>
+
+                <!-- TOOLBAR -->
+                <div class="nyt-toolbar" aria-label="Puzzle tools">
+                    <div class="toolbar-left">
+                        <div id="timer" class="timer" aria-live="polite">00:00</div>
+                    </div>
+
+                    <div class="toolbar-right">
+                        <div class="dropdown-wrapper">
+                            <button class="toolbar-btn" id="check-menu-btn" type="button" aria-haspopup="true"
+                                aria-expanded="false" aria-controls="check-dropdown">
+                                Check ▼
+                            </button>
+                            <div class="toolbar-dropdown hidden" id="check-dropdown" role="menu">
+                                <button id="check-square-btn" type="button" role="menuitem">Square</button>
+                                <button id="check-word-btn" type="button" role="menuitem">Word</button>
+                                <button id="check-puzzle-btn" type="button" role="menuitem">Puzzle</button>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-wrapper">
+                            <button class="toolbar-btn" id="reveal-menu-btn" type="button" aria-haspopup="true"
+                                aria-expanded="false" aria-controls="reveal-dropdown">
+                                Reveal ▼
+                            </button>
+                            <div class="toolbar-dropdown hidden" id="reveal-dropdown" role="menu">
+                                <button id="reveal-square-btn" type="button" role="menuitem">Square</button>
+                                <button id="reveal-word-btn" type="button" role="menuitem">Word</button>
+                                <button id="reveal-puzzle-btn" type="button" role="menuitem">Puzzle</button>
+                            </div>
+                        </div>
+
+                        <button class="toolbar-btn" id="clear-btn" type="button">Clear</button>
+                        <button class="toolbar-btn" id="instant-mistake-btn" type="button" aria-pressed="false">
+                            Mistakes: Off
+                        </button>
+                        <button class="toolbar-btn" id="next-empty-btn" type="button">Next Empty</button>
+                        <button class="toolbar-btn icon-btn" id="pause-btn" type="button" aria-label="Pause game">
+                            Pause
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PLAY WORKSPACE -->
+                <section class="section main-content" id="game-container" aria-labelledby="play-workspace-heading">
+                    <h2 id="play-workspace-heading" class="sr-only">Play workspace</h2>
+
+                    <div id="play-paused-overlay" class="play-paused-overlay hidden" aria-live="polite">
+                        Game paused
+                    </div>
+
+                    <aside class="status-panel" aria-labelledby="play-status-heading">
+                        <h3 id="play-status-heading">Game Status</h3>
+                        <p class="play-status-copy">
+                            Use the play tools to check or reveal entries while solving.
+                        </p>
+                        <p class="section-helper compact-helper">
+                            Clue navigation follows the active selection, and you can use Next Empty to stay in solving
+                            flow without hunting around the grid.
+                        </p>
+                    </aside>
+
+                    <section class="grid-panel" aria-labelledby="play-grid-heading">
+                        <h3 id="play-grid-heading">Puzzle</h3>
+                        <div class="grid-container" id="play-grid-container" aria-label="Crossword play grid"></div>
+                    </section>
+
+                    <aside class="clues-panel" aria-labelledby="play-clues-heading">
+                        <h3 id="play-clues-heading">Clues</h3>
+
+                        <section class="play-clue-panel" aria-labelledby="play-active-clue-heading">
+                            <div class="play-clue-nav">
+                                <button class="toolbar-btn" id="previous-clue-button" type="button">
+                                    Previous Clue
+                                </button>
+                                <button class="toolbar-btn" id="next-clue-button" type="button">
+                                    Next Clue
+                                </button>
+                            </div>
+                            <h4 id="play-active-clue-heading">Active Clue</h4>
+                            <p id="play-active-clue-label" class="composer-slot-label muted-text">
+                                Select a clue to begin.
+                            </p>
+                            <p id="play-active-clue-text" class="composer-preview muted-text">
+                                The current clue will appear here.
+                            </p>
+                            <p id="play-active-clue-source" class="clue-origin-detail muted-text">
+                                Clue origin details will appear here.
+                            </p>
+                            <p class="section-helper compact-helper">
+                                Authored clues come from the puzzle itself, while local and web clues are fallback help
+                                when a puzzle did not ship with its own clue set.
+                            </p>
+                        </section>
+
+                        <div class="word-list">
+                            <h4>Across</h4>
+                            <div id="play-across-display" class="word-list-display"></div>
+                        </div>
+
+                        <div class="word-list">
+                            <h4>Down</h4>
+                            <div id="play-down-display" class="word-list-display"></div>
+                        </div>
+                    </aside>
+                </section>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>© Willpatpost CROSSWORDER</p>
+        </footer>
+
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>
