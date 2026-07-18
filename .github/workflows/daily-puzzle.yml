@@ -1,0 +1,64 @@
+name: Daily Puzzle
+
+on:
+  schedule:
+    - cron: '5 4 * * *'
+    - cron: '5 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify tests
+        run: npm test
+
+      - name: Verify static app assets
+        run: npm run smoke
+
+      - name: Generate puzzle of the day
+        run: node scripts/generate-puzzle-of-the-day.mjs
+
+      - name: Validate generated daily pack
+        run: npm run validate:potd
+
+      - name: Upload daily generation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-generation-${{ github.run_id }}
+          path: |
+            data/puzzles/puzzle-of-the-day.json
+            data/puzzles/daily-history.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Commit updated daily puzzle
+        run: |
+          if git diff --quiet -- data/puzzles/puzzle-of-the-day.json data/puzzles/daily-history.json; then
+            echo "No daily puzzle changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/puzzles/puzzle-of-the-day.json data/puzzles/daily-history.json
+          git commit -m "Update puzzle of the day"
+          git push

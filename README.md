@@ -1,0 +1,104 @@
+# Crossworder
+
+Crossworder is a browser-based crossword editor, solver, and play experience built as a static site. It lets you sketch grid layouts, fill fixed letters, run a CSP-style solver against bundled word lists, and then switch into a play mode with clue lookup, check/reveal tools, and a game timer.
+
+## What’s in the project
+
+- `index.html`, `main.js`, and `style.css` provide the shell and app bootstrap.
+- `app/` contains the application coordinator plus feature-focused modules for editor, puzzle, rendering, solver, and play behavior.
+- `grid/` contains the grid rendering and interaction logic.
+- `solver/` contains the constraint builder, solving engine, and web worker entrypoint.
+- `providers/` loads bundled word/definition data and the fallback dictionary API.
+- `ui/` manages status output, clue lists, popups, and mode UI.
+- `data/words_by_length/` holds the solver’s candidate word lists.
+- `data/defs_by_length/` holds archival clue history used to generate runtime data; production builds exclude it.
+- `data/clues_by_prefix/` holds compact best-clue shards used by exact lookup and solver scoring.
+- `data/search/clue-search.json` is a compact dictionary-backed tuple index used for fast clue search.
+- `data/puzzles/` holds bundled puzzle JSON files and the puzzle index used by the random loader.
+- `data/nyt_puzzles/` is currently archival source material and is not part of the active runtime puzzle flow.
+- `scripts/` contains repository automation helpers, including puzzle-of-the-day generation.
+- `tests/` contains the Node test suite for the core logic modules.
+
+## Bundled puzzles
+
+The app now ships with JSON-backed bundled puzzles in `data/puzzles/`:
+
+- `easy.json`
+- `medium.json`
+- `hard.json`
+- `puzzle_index.json`
+
+Quick Load uses those files directly, and the random puzzle button picks from the same indexed set.
+
+## Running locally
+
+Because the app loads JSON and text assets with `fetch()`, it should be served over a local web server instead of opened directly from disk.
+
+Examples:
+
+```bash
+npm run dev
+```
+
+Then open the served URL in your browser.
+
+The dev server is a small Node script, so it works consistently on Windows, macOS, and Linux without requiring Python.
+
+## Core features
+
+- Distinct Manual and Automated editor workflows over one editable grid workspace
+- Automated rotational block-pattern layout generation and CSP-backed random fill
+- Optional rotational symmetry while painting blocks
+- Fixed-letter entry for themed or constrained fills
+- Backtracking solver running in a web worker
+- Word-pattern search using `?` wildcards
+- Play mode with clue lists, timer, pause, check, and reveal tools
+- Local clue lookup with a fallback dictionary API
+- Puzzle of the day support via a generated static JSON artifact
+
+## Architecture map
+
+- [`main.js`](main.js) bootstraps the app, navigation, theme toggle, and play toolbar behavior.
+- [`app/CrosswordApp.js`](app/CrosswordApp.js) owns shared runtime state and wires together the major subsystems.
+- [`app/features/`](app/features/) contains the main feature slices: manual and automated editing, rendering, solving, puzzles, and play mode.
+- [`grid/GridManager.js`](grid/GridManager.js) handles grid DOM rendering, selection, keyboard entry, and highlighting.
+- [`solver/`](solver/) contains slot/constraint extraction, the CSP solver, and the browser worker entrypoint.
+- [`providers/`](providers/) loads local word and clue data and falls back to the dictionary API when needed.
+- [`ui/`](ui/) renders status logs, entry lists, clue hydration, mode UI, and popups.
+
+## Puzzle data shape
+
+Bundled puzzle files are JSON documents under `data/puzzles/`. At minimum, the app expects:
+
+- `grid`: a non-empty rectangular array of rows
+- Each row can be an array of cell values or a string
+- Open cells can be blank/space, blocks can be `.` or `#`, and letters are normalized to uppercase
+
+Optional fields currently used by the runtime include:
+
+- `title`
+- `author`
+- `date`
+- `difficulty`
+- `clues.across` / `clues.down`
+
+## Automation
+
+- `.github/workflows/ci.yml` runs the Node test suite on pushes and pull requests.
+- `npm run smoke` serves a local in-process static site and verifies that the app shell, worker, puzzle data, word lists, and clue-search index are all reachable.
+- `npm run test:e2e` runs the daily-puzzle play workflow in Chromium with Playwright.
+- `npm run build` creates a deployable `dist/` directory containing runtime files only. Archival NYT puzzles, tests, docs, and repository automation are excluded.
+- `npm run smoke:dist` verifies the generated deployment artifact.
+- `.github/workflows/daily-puzzle.yml` generates `data/puzzles/puzzle-of-the-day.json` on a nightly schedule and commits it back to the repository.
+- `npm run generate:clue-index` rebuilds `data/search/clue-search.json` from the larger definition archives.
+- `npm run generate:clue-shards` rebuilds compact runtime lookup shards from the clue-search index.
+- `npm run generate:clue-data` rebuilds both generated clue datasets in the required order.
+- `npm run generate:potd` lets you generate the daily puzzle locally on demand.
+
+## Notes
+
+- The solver depends on the bundled word lists, so fill quality is only as strong as that data.
+- Puzzle clues are optional in the bundled JSON format. If a puzzle file does not include clues, the app falls back to the local definitions database during play mode.
+- Clue search uses the compact generated search index, while exact clue lookup uses the compact prefix shards.
+- The automated suite covers core behavior, static assets, the production artifact, and the primary play workflow. Manual browser verification is still useful after UI-heavy changes.
+- The source tree is intentionally organized so top-level app code stays minimal, with feature logic living under `app/` and domain-specific modules staying in their own folders.
